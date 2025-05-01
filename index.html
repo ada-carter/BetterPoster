@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Better Poster Maker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1 id="fixedSiteTitle">Better Poster Maker</h1>
+  <div class="app-container">
+    <div class="controls">
+      <h1>Better Poster Maker T1</h1>
+      <fieldset>
+        <legend>Size (inches)</legend>
+        <label>Width: <input type="number" id="posterWidth" value="42" min="8" max="72"> in</label>
+        <label>Height: <input type="number" id="posterHeight" value="36" min="8" max="48"> in</label>
+      </fieldset>
+      <fieldset>
+        <legend>Panels Ratio</legend>
+        <label>Middle to Side Ratio: <input type="number" id="ratio" value="2" min="1" max="5" step="0.1"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Background</legend>
+        <label><input type="radio" name="bgType" value="color" checked> Highlight Color</label>
+        <label><input type="radio" name="bgType" value="gradient"> Gradient</label>
+        <div id="colorPicker">
+          <label>Color: <input type="color" id="bgColor" value="#000000"></label>
+          <label>Opacity: <input type="range" id="bgOpacity" min="0" max="1" step="0.01" value="1" oninput="document.getElementById('bgOpacityValue').textContent=this.value"><span id="bgOpacityValue">1</span></label>
+        </div>
+        <div id="gradientPicker" style="display:none;">
+          <label>Type: <select id="gradientType"><option value="linear" selected>Linear</option><option value="radial">Radial</option></select></label>
+          <label>Angle: <input type="range" id="gradAngle" min="0" max="360" value="135" step="5" oninput="document.getElementById('gradAngleValue').textContent=this.value+'°'"><span id="gradAngleValue">135°</span></label>
+          <div id="gradStops">
+            <div class="grad-stop"><label>Stop 1: <input type="color" class="gradStopColor" value="#000000"></label></div>
+            <div class="grad-stop"><label>Stop 2: <input type="color" class="gradStopColor" value="#333333"></label></div>
+          </div>
+          <button type="button" id="addGradStop">+ Add Stop</button>
+          <button type="button" id="removeGradStop">- Remove Stop</button>
+          <button type="button" id="randomizeGradient">Randomize Gradient</button>
+        </div>
+      </fieldset>
+      
+      <fieldset>
+        <legend>Middle Panel</legend>
+        <label>Panel Text: <input type="text" id="titleText" placeholder="Enter panel text"></label>
+        <label>Alignment: 
+          <select id="mainAlignment">
+            <option value="left">Left</option>
+            <option value="center" selected>Center</option>
+            <option value="right">Right</option>
+          </select>
+        </label>
+        <label>Graphic/Figure: <input type="file" id="mainImage" accept="image/*"></label>
+        <label>Figure Scale: <input type="range" id="figureScale" min="0.1" max="3" step="0.1" value="1" oninput="document.getElementById('figureScaleValue').textContent=this.value+'x'"><span id="figureScaleValue">1x</span></label>
+        <p class="remove-bg-link"><small>Want to remove your background? Try <a href="https://www.remove.bg/" target="_blank" rel="noopener">remove.bg</a></small></p>
+      </fieldset>
+      
+      <fieldset id="leftContentFieldset">
+        <legend>Left Panel Content</legend>
+        <!-- Custom sections container -->
+        <label>Poster Title: <input type="text" id="posterTitle" data-maxlength="60"></label>
+        <label>Authors (use ^n to reference affiliations, e.g., Name^1, Other^2): <input type="text" id="authors" data-maxlength="100"></label>
+        <label>Affiliations (separate with ";", prefix each with ^n): <input type="text" id="affiliation" data-maxlength="200"></label>
+        
+        <label>Introduction: <textarea id="introduction" data-maxlength="500" placeholder="Brief introduction to your research"></textarea></label>
+        
+        <label>Objective: <textarea id="objective" data-maxlength="300" placeholder="State the purpose of your study"></textarea></label>
+        
+        <label>Methodology: <textarea id="methodology" data-maxlength="500" placeholder="How you conducted your research"></textarea></label>
+        <button type="button" id="addCustomSection">Add Section</button>
+        <div id="customSections"></div>
+      </fieldset>
+      
+      <fieldset>
+        <legend>Right Panel Content</legend>
+        <label>Analysis: <textarea id="analysis" data-maxlength="500" placeholder="Analysis of your findings"></textarea></label>
+        
+        <label>Results: <textarea id="results" data-maxlength="500" placeholder="Key findings, bulletpoints preferred"></textarea></label>
+        
+        <label>Conclusion: <textarea id="conclusion" data-maxlength="500" placeholder="Summary and implications"></textarea></label>
+        
+        <label>Acknowledgements: <textarea id="acknowledgements" data-maxlength="300" placeholder="People and organizations to thank"></textarea></label>
+        
+        <label>References: <textarea id="references" data-maxlength="500" placeholder="Key references, APA format"></textarea></label>
+      </fieldset>
+      
+
+      <fieldset id="qrSettings">
+        <legend>QR Code Settings</legend>
+        <label><input type="checkbox" id="includeQRCode" checked> Include QR Code</label>
+        <label><input type="checkbox" id="adaptiveColors" checked> Adaptive Contrast</label>
+        <label><input type="checkbox" id="transparentModules" checked> Transparent modules (show accent)</label>
+        <label>Dark Color: <input type="color" id="qrDarkColor" value="#000000"></label>
+        <label>Light Color: <input type="color" id="qrLightColor" value="#ffffff"></label>
+        <label>Error Correction Level: <select id="qrErrorCorrection"><option value="L">Low</option><option value="M" selected>Medium</option><option value="Q">Quartile</option><option value="H">High</option></select></label>
+        <label>QR Code Data (URL): <input type="text" id="qrData" data-maxlength="200" placeholder="Full paper URL"></label>
+        <label>QR Caption: <input type="text" id="qrLabelTextInput" value="Read the full paper here:" data-maxlength="60"></label>
+        <!-- New Feature Controls -->
+        <label>QR Code Size (px): <input type="range" id="qrSize" min="60" max="300" step="10" value="120" oninput="document.getElementById('qrSizeValue').textContent=this.value+'px'"><span id="qrSizeValue">120px</span></label>
+        <label>Margin (px): <input type="number" id="qrMargin" min="0" max="20" value="4"></label>
+        <label><input type="checkbox" id="attachQRLabel" checked> Attach Label to QR Code</label>
+        <label><input type="checkbox" id="matchQRLabelColor" checked> Match Label Color to Panel Text</label>
+        <label>Label Font Size: <input type="number" id="qrLabelFontSize" min="10" max="24" value="14">px</label>
+        <label>Label Color: <input type="color" id="qrLabelFontColor" value="#000000"></label>
+      </fieldset>
+      
+      <fieldset>
+        <legend>Section Management</legend>
+        <div class="section-visibility-controls">
+          <label><input type="checkbox" class="section-toggle" data-section="introduction" checked> Show Introduction</label>
+          <label><input type="checkbox" class="section-toggle" data-section="objective" checked> Show Objective</label>
+          <label><input type="checkbox" class="section-toggle" data-section="methodology" checked> Show Methodology</label>
+          <label><input type="checkbox" class="section-toggle" data-section="analysis" checked> Show Analysis</label>
+          <label><input type="checkbox" class="section-toggle" data-section="results" checked> Show Results</label>
+          <label><input type="checkbox" class="section-toggle" data-section="conclusion" checked> Show Conclusion</label>
+          <label><input type="checkbox" class="section-toggle" data-section="acknowledgements" checked> Show Acknowledgements</label>
+          <label><input type="checkbox" class="section-toggle" data-section="references" checked> Show References</label>
+        </div>
+        <!-- Rename existing section titles -->
+        <div id="sectionNamingControls">
+          <label>Introduction Name: <input type="text" class="section-name-input" data-section="introduction" id="sectionName_introduction" value="Introduction"></label>
+          <label>Objective Name: <input type="text" class="section-name-input" data-section="objective" id="sectionName_objective" value="Objective"></label>
+          <label>Methodology Name: <input type="text" class="section-name-input" data-section="methodology" id="sectionName_methodology" value="Methodology"></label>
+          <label>Analysis Name: <input type="text" class="section-name-input" data-section="analysis" id="sectionName_analysis" value="Analysis"></label>
+          <label>Results Name: <input type="text" class="section-name-input" data-section="results" id="sectionName_results" value="Results"></label>
+          <label>Conclusion Name: <input type="text" class="section-name-input" data-section="conclusion" id="sectionName_conclusion" value="Conclusion"></label>
+          <label>Acknowledgements Name: <input type="text" class="section-name-input" data-section="acknowledgements" id="sectionName_acknowledgements" value="Acknowledgements"></label>
+          <label>References Name: <input type="text" class="section-name-input" data-section="references" id="sectionName_references" value="References"></label>
+        </div>
+      </fieldset>
+      
+      <div class="export-buttons">
+        <button id="exportPDF">Export PDF</button>
+        <button id="exportJPG">Export JPG</button>
+      </div>
+      <fieldset>
+        <legend>Save/Load Poster</legend>
+        <button id="saveJSON" type="button">Save Poster JSON</button>
+        <label><input type="file" id="loadJSON" accept="application/json"> Load Poster JSON</label>
+      </fieldset>
+      <div id="sidebar-footer" style="margin-top:1rem; font-size:0.8rem; text-align:center;">
+        Made with 🩷 by <a href="https://ada-carter.github.io/dev-site/" target="_blank" rel="noopener noreferrer">Ada Carter</a>
+      </div>
+    </div>
+    <div class="poster-preview" id="posterPreview">
+      <div class="panel-container">
+        <div class="panel side" id="leftPanel">
+          <div class="side-content">
+            <div class="section poster-title-section">
+              <h1 id="previewPosterTitle"></h1>
+              <div id="previewAuthors" class="authors"></div>
+              <div id="previewAffiliation" class="affiliation"></div>
+            </div>
+            
+            <div class="section">
+              <h2>Introduction</h2>
+              <div id="previewIntroduction"></div>
+            </div>
+            
+            <div class="section">
+              <h2>Objective</h2>
+              <div id="previewObjective"></div>
+            </div>
+            
+            <div class="section">
+              <h2>Methodology</h2>
+              <div id="previewMethodology"></div>
+            </div>
+            <div id="customPreviewSections"></div>
+          </div>
+        </div>
+        
+        <div class="panel middle" id="middlePanel">
+          <div class="middle-content">
+            <div id="mainFinding"></div>
+            <div id="mainImageContainer" class="main-image-container"></div>
+            <div id="qrContainer" class="qr-container">
+              <div id="qrLabelText"></div>
+              <div id="qrCode"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="panel side" id="rightPanel">
+          <div class="side-content">
+
+            <div class="section">
+              <h2>Analysis</h2>
+              <div id="previewAnalysis"></div>
+            </div>
+            
+            <div class="section">
+              <h2>Results</h2>
+              <div id="previewResults"></div>
+            </div>
+            
+
+            <div class="section">
+              <h2>Conclusion</h2>
+              <div id="previewConclusion"></div>
+            </div>
+            
+            <div class="section">
+              <h2>Acknowledgements</h2>
+              <div id="previewAcknowledgements"></div>
+            </div>
+            
+            <div class="section">
+              <h2>References</h2>
+              <div id="previewReferences"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="scripts/configManager.js"></script>
+  <script src="scripts/figureAnnotator.js"></script>
+  <script src="scripts/figureAnnotatorLogic.js"></script>
+  <script src="scripts/fontControls.js"></script>
+  <script src="scripts/qrGenerator.js"></script>
+  <script src="scripts/scripts.js"></script>
+  <script src="scripts/sidebarListeners.js"></script>
+  <script src="scripts/storage.js"></script>
+  <!-- Donation banner (not saved in poster export) -->
+  <div id="donation-banner" style="position:fixed; bottom:10px; right:10px; background:rgba(255,255,255,0.8); padding:5px 10px; border-radius:5px; display:flex; align-items:center; font-size:0.8rem; color:#333; z-index:1000; pointer-events:auto;">
+    <img src="assets/heart.png" alt="heart" style="width:16px; height:16px; margin-right:5px;">
+    <span>Like this free tool? Please donate to <a href="https://chuffed.org/project/115245-dahnoun-mutual-aid" target="_blank" rel="noopener noreferrer">Dahnoun Mutual Aid</a></span>
+  </div>
+</body>
+</html>
