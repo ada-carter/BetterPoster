@@ -368,8 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pdf.save('poster.pdf');
   });
   exportJPG.addEventListener('click', async () => {
-    const dpiSelect = document.getElementById('exportDPISetting');
-    const dpi = dpiSelect ? parseInt(dpiSelect.value, 10) : 600;
+    const dpi = 600;
     const ppi = 96;
     const scale = dpi / ppi;
     const root = document.documentElement;
