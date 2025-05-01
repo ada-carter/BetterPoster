@@ -347,50 +347,152 @@ document.addEventListener('DOMContentLoaded', () => {
     const dpi = 600;
     const ppi = 96;
     const scale = dpi / ppi;
-    // temporarily set poster dimensions to CSS inches
-    const root = document.documentElement;
-    const origW = root.style.getPropertyValue('--poster-width');
-    const origH = root.style.getPropertyValue('--poster-height');
-    const widthIn = parseFloat(posterWidth.value);
-    const heightIn = parseFloat(posterHeight.value);
-    root.style.setProperty('--poster-width', `${widthIn}in`);
-    root.style.setProperty('--poster-height', `${heightIn}in`);
-    // render
-    const canvas = await html2canvas(panelContainer, { scale, useCORS: true });
-    // restore
-    root.style.setProperty('--poster-width', origW);
-    root.style.setProperty('--poster-height', origH);
-    // PDF
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'in', format: [widthIn, heightIn] });
-    pdf.addImage(imgData, 'PNG', 0, 0, widthIn, heightIn);
-    pdf.save('poster.pdf');
+    
+    // Get QR code settings for high-res generation
+    const qrCodeDiv = document.getElementById('qrCode');
+    const qrSize = parseInt(document.getElementById('qrSize').value, 10);
+    const qrErrorCorrection = document.getElementById('qrErrorCorrection').value;
+    const qrMargin = parseInt(document.getElementById('qrMargin').value, 10);
+    const qrDataInput = document.getElementById('qrData');
+    const adaptiveColors = document.getElementById('adaptiveColors');
+    const transparentModules = document.getElementById('transparentModules');
+    const qrDarkColor = document.getElementById('qrDarkColor');
+    const qrLightColor = document.getElementById('qrLightColor');
+    
+    // Determine QR colors
+    let darkColor, lightColor;
+    if (adaptiveColors.checked) {
+      const panel = document.getElementById('middlePanel');
+      const bg = window.getComputedStyle(panel).backgroundColor;
+      const match = bg.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+      let r = 255, g = 255, b = 255;
+      if (match) { r = +match[1]; g = +match[2]; b = +match[3]; }
+      const lum = 0.299*r + 0.587*g + 0.114*b;
+      const isLight = lum > 128;
+      darkColor = isLight ? '#000000' : '#FFFFFF';
+      lightColor = transparentModules.checked ? 'transparent' : (isLight ? '#FFFFFF' : '#000000');
+    } else {
+      darkColor = qrDarkColor.value;
+      lightColor = transparentModules.checked ? 'transparent' : qrLightColor.value;
+    }
+
+    // Generate high-res QR code
+    if (qrDataInput.value.trim()) {
+      const hiResQR = await window.generateHiResQR({
+        text: qrDataInput.value.trim(),
+        size: qrSize * scale,
+        margin: qrMargin,
+        darkColor,
+        lightColor,
+        errorLevel: qrErrorCorrection
+      });
+      
+      // Replace QR code with high-res version temporarily
+      const originalQRHtml = qrCodeDiv.innerHTML;
+      qrCodeDiv.innerHTML = '';
+      qrCodeDiv.appendChild(hiResQR.canvas);
+
+      // temporarily set poster dimensions to CSS inches
+      const root = document.documentElement;
+      const origW = root.style.getPropertyValue('--poster-width');
+      const origH = root.style.getPropertyValue('--poster-height');
+      const widthIn = parseFloat(posterWidth.value);
+      const heightIn = parseFloat(posterHeight.value);
+      root.style.setProperty('--poster-width', `${widthIn}in`);
+      root.style.setProperty('--poster-height', `${heightIn}in`);
+      
+      // render
+      const canvas = await html2canvas(panelContainer, { scale, useCORS: true });
+      
+      // restore original QR code and dimensions
+      qrCodeDiv.innerHTML = originalQRHtml;
+      root.style.setProperty('--poster-width', origW);
+      root.style.setProperty('--poster-height', origH);
+      
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'in', format: [widthIn, heightIn] });
+      pdf.addImage(imgData, 'PNG', 0, 0, widthIn, heightIn);
+      pdf.save('poster.pdf');
+    }
   });
+
   exportJPG.addEventListener('click', async () => {
     const dpi = 600;
     const ppi = 96;
     const scale = dpi / ppi;
-    const root = document.documentElement;
-    const origW = root.style.getPropertyValue('--poster-width');
-    const origH = root.style.getPropertyValue('--poster-height');
-    const widthIn = parseFloat(posterWidth.value);
-    const heightIn = parseFloat(posterHeight.value);
-    root.style.setProperty('--poster-width', `${widthIn}in`);
-    root.style.setProperty('--poster-height', `${heightIn}in`);
-    const canvas = await html2canvas(panelContainer, { scale, useCORS: true });
-    root.style.setProperty('--poster-width', origW);
-    root.style.setProperty('--poster-height', origH);
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'poster.jpg';
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    }, 'image/jpeg', 1.0);
+    
+    // Get QR code settings for high-res generation
+    const qrCodeDiv = document.getElementById('qrCode');
+    const qrSize = parseInt(document.getElementById('qrSize').value, 10);
+    const qrErrorCorrection = document.getElementById('qrErrorCorrection').value;
+    const qrMargin = parseInt(document.getElementById('qrMargin').value, 10);
+    const qrDataInput = document.getElementById('qrData');
+    const adaptiveColors = document.getElementById('adaptiveColors');
+    const transparentModules = document.getElementById('transparentModules');
+    const qrDarkColor = document.getElementById('qrDarkColor');
+    const qrLightColor = document.getElementById('qrLightColor');
+    
+    // Determine QR colors
+    let darkColor, lightColor;
+    if (adaptiveColors.checked) {
+      const panel = document.getElementById('middlePanel');
+      const bg = window.getComputedStyle(panel).backgroundColor;
+      const match = bg.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+      let r = 255, g = 255, b = 255;
+      if (match) { r = +match[1]; g = +match[2]; b = +match[3]; }
+      const lum = 0.299*r + 0.587*g + 0.114*b;
+      const isLight = lum > 128;
+      darkColor = isLight ? '#000000' : '#FFFFFF';
+      lightColor = transparentModules.checked ? 'transparent' : (isLight ? '#FFFFFF' : '#000000');
+    } else {
+      darkColor = qrDarkColor.value;
+      lightColor = transparentModules.checked ? 'transparent' : qrLightColor.value;
+    }
+
+    // Generate high-res QR code
+    if (qrDataInput.value.trim()) {
+      const hiResQR = await window.generateHiResQR({
+        text: qrDataInput.value.trim(),
+        size: qrSize * scale,
+        margin: qrMargin,
+        darkColor,
+        lightColor,
+        errorLevel: qrErrorCorrection
+      });
+      
+      // Replace QR code with high-res version temporarily
+      const originalQRHtml = qrCodeDiv.innerHTML;
+      qrCodeDiv.innerHTML = '';
+      qrCodeDiv.appendChild(hiResQR.canvas);
+
+      const root = document.documentElement;
+      const origW = root.style.getPropertyValue('--poster-width');
+      const origH = root.style.getPropertyValue('--poster-height');
+      const widthIn = parseFloat(posterWidth.value);
+      const heightIn = parseFloat(posterHeight.value);
+      root.style.setProperty('--poster-width', `${widthIn}in`);
+      root.style.setProperty('--poster-height', `${heightIn}in`);
+      
+      const canvas = await html2canvas(panelContainer, { scale, useCORS: true });
+      
+      // Restore original QR code and dimensions
+      qrCodeDiv.innerHTML = originalQRHtml;
+      root.style.setProperty('--poster-width', origW);
+      root.style.setProperty('--poster-height', origH);
+      
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'poster.jpg';
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 'image/jpeg', 1.0);
+    }
   });
 
   // Check if an element has overflow

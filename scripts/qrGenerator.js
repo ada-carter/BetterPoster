@@ -202,26 +202,25 @@ document.addEventListener('DOMContentLoaded', () => {
         darkColor = qrDarkColor.value;
         lightColor = transparentModules.checked ? 'transparent' : qrLightColor.value;
       }
-      const correctionMap = { L: QRCode.CorrectLevel.L, M: QRCode.CorrectLevel.M, Q: QRCode.CorrectLevel.Q, H: QRCode.CorrectLevel.H };
+
+      // Clear previous QR code
+      qrCodeDiv.innerHTML = '';
+      
+      // Create new QR code using canvas mode
       new QRCode(qrCodeDiv, {
         text: qrDataInput.value.trim(),
         width: qrSize,
         height: qrSize,
         colorDark: darkColor,
         colorLight: lightColor,
-        correctLevel: correctionMap[qrErrorCorrection]
+        correctLevel: QRCode.CorrectLevel[qrErrorCorrection]
       });
-      qrLabelText.textContent = qrLabelTextInput.value;
 
-      // Position QR and label
-      const pos = qrPosition.value;
-      const labelPos = qrLabelPosition.value;
-      ['bottom-left', 'bottom-center', 'bottom-right'].forEach(p => {
-        qrCodeDiv.classList.remove(`qr-pos-${p}`);
-        qrLabelText.classList.remove(`qr-label-pos-${p}`);
-      });
-      qrCodeDiv.classList.add(`qr-pos-${pos}`);
-      qrLabelText.classList.add(`qr-label-pos-${labelPos}`);
+      // Apply QR code margin
+      qrCodeDiv.style.padding = qrMargin + 'px';
+      
+      // Set label text
+      qrLabelText.textContent = qrLabelTextInput.value;
     }
   };
 });
